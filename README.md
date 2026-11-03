@@ -82,6 +82,19 @@ The build is ad-hoc signed for local use. Distribution (Developer ID signing, no
 
 QR and pairing-code discovery use mDNS (`adb mdns`). Some office or VPN networks block it; use the USB switch or the manual IP fields there.
 
+## Releases
+
+Releases are automatic. Every push to `main` is checked against its [Conventional Commit](https://www.conventionalcommits.org) messages since the last tag:
+
+| Commit | Release |
+|---|---|
+| `feat: …` | minor (0.1.0 → 0.2.0) |
+| `fix: …`, `perf: …` | patch (0.1.0 → 0.1.1) |
+| `feat!: …` or `BREAKING CHANGE` in the body | major |
+| `docs`, `chore`, `ci`, `test`, `build`, `refactor`, `style` only, or `[skip release]` | no release |
+
+When a release is due, GitHub Actions builds the DMG, tags the version and publishes the release with generated notes. The logic lives in `AndroidMonitor/Scripts/next-version.sh` and `.github/workflows/release.yml`; pull requests only run a build check (`ci.yml`).
+
 ## How it works
 
 - `Sources/AndroidMonitorCore`: UI-independent services (ADB process runner, device registry, files, logcat parsing, pairing, privilege detection)

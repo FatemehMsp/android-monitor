@@ -1,0 +1,56 @@
+name: Release
+
+# Every push to main is checked against its Conventional Commit messages (see AndroidMonitor/Scripts/next-version.sh):
+#   feat -> minor, fix/perf -> patch, type! or BREAKING CHANGE -> major. docs/chore/ci/... alone release nothing.
+# When a release is due this builds the DMG and publishes a GitHub release with generated notes.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: AndroidMonitor
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide version
+        id: version
+        run: ./Scripts/next-version.sh | tee -a "$GITHUB_OUTPUT"
+
+      - name: Install XcodeGen
+        if: steps.version.outputs.release == 'true'
+        run: brew install xcodegen
+
+      - name: Stamp version
+        if: steps.version.outputs.release == 'true'
+        run: |
+          sed -i '' "s/MARKETING_VERSION: .*/MARKETING_VERSION: ${{ steps.version.outputs.version }}/" project.yml
+          sed -i '' "s/CURRENT_PROJECT_VERSION: .*/CURRENT_PROJECT_VERSION: ${{ github.run_number }}/" project.yml
+
+      - name: Build DMG
+        if: steps.version.outputs.release == 'true'
+        run: ./Scripts/create-dmg.sh
+
+      - name: Publish release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          gh release create "$VERSION" dist/AndroidMonitor.dmg dist/AndroidMonitor.dmg.sha256 \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Android Monitor ${VERSION#v}" \
+            --generate-notes \
+            --notes "**Install:** open the DMG and drag *Android Monitor* to Applications. The app is not notarized: on first launch right-click → Open, or run \`xattr -dr com.apple.quarantine \"/Applications/Android Monitor.app\"\`. Apple Silicon, macOS 14+."
