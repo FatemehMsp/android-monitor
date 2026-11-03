@@ -19,6 +19,8 @@ targets:
       - path: Resources/amclip.jar
         buildPhase: resources
       - Resources/Assets.xcassets
+      - path: ../NOTICE
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.androidmonitor.mac

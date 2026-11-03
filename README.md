@@ -40,13 +40,14 @@ A native macOS app (SwiftUI) for mirroring, controlling and inspecting Android p
 
 Grab `AndroidMonitor.dmg` from the [Releases](../../releases) page, open it and drag **Android Monitor** to Applications.
 
-The app is not notarized (no paid Apple Developer account), so macOS blocks the first launch. Either right-click the app → **Open** → **Open**, or run:
+- **Not notarized.** The app is not notarized (there is no paid Apple Developer account behind it), so macOS blocks the first launch. Either right-click the app → **Open** → **Open**, or run:
 
-```bash
-xattr -dr com.apple.quarantine "/Applications/Android Monitor.app"
-```
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/Android Monitor.app"
+  ```
 
-Apple Silicon, macOS 14+. Google's `adb` is bundled inside the app (Apache 2.0).
+- **Apple Silicon and macOS 14 or newer only.**
+- Google's `adb` (Apache 2.0) is bundled inside the app; see [NOTICE](NOTICE).
 
 ## Requirements (to build from source)
 
@@ -100,4 +101,4 @@ Mirroring uses `adb exec-out screenrecord`, so latency depends on the phone's en
 
 ## License
 
-MIT, see [LICENSE](LICENSE). `adb` is Google's tool (Apache 2.0) and is downloaded at build time, not stored in this repository.
+MIT, see [LICENSE](LICENSE). Third-party notices, including the Apache 2.0 text for `adb`, are in [NOTICE](NOTICE). `adb` is Google's tool; it is downloaded at build time, not stored in this repository, and bundled unmodified in release builds.
