@@ -3,6 +3,12 @@ import SwiftUI
 struct DeviceWorkspaceView: View {
     let device: AndroidDevice
     @AppStorage("mirrorEnabled") private var mirrorEnabled = true
+    @StateObject private var installer: DropInstaller
+
+    init(device: AndroidDevice) {
+        self.device = device
+        _installer = StateObject(wrappedValue: DropInstaller(serial: device.serial))
+    }
 
     var body: some View {
         HSplitView {
@@ -49,6 +55,8 @@ struct DeviceWorkspaceView: View {
             InspectorPanels(serial: device.serial)
                 .frame(minWidth: 420)
         }
+        .onDrop(of: [.fileURL], isTargeted: $installer.targeted) { installer.accept($0) }
+        .overlay { DropOverlay(installer: installer) }
     }
 }
 
