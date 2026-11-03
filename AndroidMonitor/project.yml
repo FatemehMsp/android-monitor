@@ -1,0 +1,46 @@
+name: AndroidMonitor
+options:
+  minimumXcodeGenVersion: 2.42.0
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: 14.0
+    ARCHS: arm64
+    SWIFT_VERSION: 6.0
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  AndroidMonitor:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/AndroidMonitorApp
+      - Sources/AndroidMonitorCore
+      - path: Resources/adb
+        buildPhase: resources
+      - path: Resources/amclip.jar
+        buildPhase: resources
+      - Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.androidmonitor.mac
+        PRODUCT_NAME: Android Monitor
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        CODE_SIGN_STYLE: Automatic
+  AndroidMonitorTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/AndroidMonitorTests
+    dependencies:
+      - target: AndroidMonitor
+  AndroidMonitorUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - Tests/AndroidMonitorUITests
+    dependencies:
+      - target: AndroidMonitor
+

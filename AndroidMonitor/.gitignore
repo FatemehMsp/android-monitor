@@ -1,0 +1,11 @@
+AndroidMonitor.xcodeproj/
+DerivedData*/
+build/
+dist/
+*.xcresult
+.DS_Store
+.build-xcode/
+.build/
+default.profraw
+
+Resources/adb

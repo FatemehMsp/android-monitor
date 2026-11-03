@@ -1,0 +1,91 @@
+# Android Monitor
+
+A native macOS app (SwiftUI) for mirroring, controlling and inspecting Android phones over USB or Wi‑Fi. It is built on `adb`; nothing is installed on the phone.
+
+<!-- Screenshots: add PNGs to docs/screenshots/ and uncomment.
+![Mirror](docs/screenshots/mirror.png)
+![Apps](docs/screenshots/apps.png)
+![Logcat](docs/screenshots/logcat.png)
+-->
+
+## Features
+
+**Mirror and control**
+- Live screen mirror (H.264 via `screenrecord`, decoded with VideoToolbox / `AVSampleBufferDisplayLayer`)
+- Mouse click, drag-to-swipe, scroll wheel / trackpad scrolling; right click = Back, middle click = Home
+- Keyboard typing and special keys (Enter, Delete, Tab, arrows, Esc = Back)
+- Clipboard: ⌘V / ⌘C / ⌘X / ⌘A act on the phone, and anything copied on the phone is synced to the Mac (text, full Unicode)
+- Back / Home / Recents / Power buttons, screenshot, screen recording
+- The stream pauses automatically when the window is hidden or the app has been inactive for 5 seconds; a toggle turns the mirror off entirely to save memory
+
+**Files**
+- Folder browser with size and date, quick links (Internal, Download, DCIM, …)
+- Upload (including drag and drop), download, rename, delete, new folder
+- Open text files in an editor and save them back to the device
+
+**Apps**
+- Grid with real app icons, search, and User / System / Debuggable filters
+- Launch, force stop, app info, clear data, uninstall, install APK, save APK
+
+**Logcat**
+- Colored by priority, search with highlighting, tag and level filters, pause, clear, save
+- Streams only while the tab is visible; buffers are capped and trimmed under memory pressure
+
+**More**
+- Shell, device information, Data explorer with Normal / Debuggable (`run-as`) / Root (`su`, only after confirmation) access
+- Multiple devices in the sidebar, one active at a time
+- Wi‑Fi connection: switch a USB phone to Wi‑Fi, QR pairing, pairing code, or connect by IP
+
+## Requirements
+
+- macOS 14 or newer, Apple Silicon
+- Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- Android platform-tools, or internet access so the build can download them
+- On the phone: Developer options → USB debugging
+
+## Build and run
+
+```bash
+cd AndroidMonitor
+./Scripts/build-release.sh      # fetches adb, generates the Xcode project, builds dist/Android Monitor.app
+open "dist/Android Monitor.app"
+```
+
+The build is ad-hoc signed for local use. Distribution (Developer ID signing, notarization, DMG) is not set up yet; see `Scripts/create-dmg.sh`.
+
+## Connecting a phone
+
+| Method | Steps |
+|---|---|
+| USB | Plug in, accept the RSA prompt on the phone |
+| USB → Wi‑Fi | Pair over Wi‑Fi → *Via USB* → *Switch USB phone to Wi‑Fi* (phone and Mac on the same network) |
+| QR code | Phone: Wireless debugging → *Pair device with QR code*, scan the code shown by the app |
+| Pairing code | Phone: *Pair device with pairing code*; pick the phone in the app and type the code |
+| IP | Enter IP and port from the Wireless debugging screen |
+
+QR and pairing-code discovery use mDNS (`adb mdns`). Some office or VPN networks block it; use the USB switch or the manual IP fields there.
+
+## How it works
+
+- `Sources/AndroidMonitorCore`: UI-independent services (ADB process runner, device registry, files, logcat parsing, pairing, privilege detection)
+- `Sources/AndroidMonitorApp`: SwiftUI / AppKit UI, mirror view, input and clipboard bridges
+- `Scripts/cliphelper`: two tiny Java helpers (`ClipHelper`, `AppsHelper`) compiled to `Resources/amclip.jar` and run on the phone through `app_process` for the clipboard and app icons; rebuild with `Scripts/build-cliphelper.sh` (needs a JDK and the Android SDK, `platforms/android-33` and `d8`)
+- `Scripts/make-icon.swift`: generates the app icon
+
+Mirroring uses `adb exec-out screenrecord`, so latency depends on the phone's encoder. A scrcpy-style server would lower it; that is a possible future step.
+
+## Safety
+
+- Root and protected-file writes run only after an explicit confirmation showing device, path and access level
+- Pairing codes, clipboard contents and file contents are not written to logs
+- Helpers run through `adb shell`; nothing persistent is installed on the phone
+
+## Limitations
+
+- Typing in the mirror sends ASCII keystrokes; use ⌘V to enter other scripts
+- The clipboard bridge handles text only (no images or files)
+- One active device at a time; Apple Silicon only for now
+
+## License
+
+MIT, see [LICENSE](LICENSE). `adb` is Google's tool (Apache 2.0) and is downloaded at build time, not stored in this repository.
