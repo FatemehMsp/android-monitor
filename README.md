@@ -36,7 +36,19 @@ A native macOS app (SwiftUI) for mirroring, controlling and inspecting Android p
 - Multiple devices in the sidebar, one active at a time
 - Wi‑Fi connection: switch a USB phone to Wi‑Fi, QR pairing, pairing code, or connect by IP
 
-## Requirements
+## Download
+
+Grab `AndroidMonitor.dmg` from the [Releases](../../releases) page, open it and drag **Android Monitor** to Applications.
+
+The app is not notarized (no paid Apple Developer account), so macOS blocks the first launch. Either right-click the app → **Open** → **Open**, or run:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Android Monitor.app"
+```
+
+Apple Silicon, macOS 14+. Google's `adb` is bundled inside the app (Apache 2.0).
+
+## Requirements (to build from source)
 
 - macOS 14 or newer, Apple Silicon
 - Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
