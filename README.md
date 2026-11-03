@@ -2,11 +2,15 @@
 
 A native macOS app (SwiftUI) for mirroring, controlling and inspecting Android phones over USB or Wi‑Fi. It is built on `adb`; nothing is installed on the phone.
 
-<!-- Screenshots: add PNGs to docs/screenshots/ and uncomment.
-![Mirror](docs/screenshots/mirror.png)
-![Apps](docs/screenshots/apps.png)
-![Logcat](docs/screenshots/logcat.png)
--->
+<p align="center">
+  <img src="docs/screenshots/files.png" alt="Mirror and file browser" width="100%">
+</p>
+
+| Apps with icons | Colored logcat with filters |
+|---|---|
+| <img src="docs/screenshots/apps.png" alt="Apps grid"> | <img src="docs/screenshots/logcat.png" alt="Logcat"> |
+
+*Screenshots use sample data.*
 
 ## Features
 
