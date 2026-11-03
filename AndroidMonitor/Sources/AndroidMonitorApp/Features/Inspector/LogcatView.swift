@@ -29,8 +29,6 @@ final class LogcatView: NSView, NSSearchFieldDelegate, NSTextFieldDelegate {
     }
     required init?(coder: NSCoder) { nil }
 
-    isolated deinit { stop() }
-
     override func viewDidMoveToWindow() { if window == nil { stop() } }
 
     // MARK: UI

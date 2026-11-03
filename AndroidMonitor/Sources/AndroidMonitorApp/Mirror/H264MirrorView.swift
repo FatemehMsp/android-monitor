@@ -123,13 +123,20 @@ struct H264MirrorView: NSViewRepresentable {
             let displayLayer = surface.displayLayer
             self.displayLayer = displayLayer
             observers.append(NotificationCenter.default.addObserver(forName: MirrorNotification.startRecording, object: nil, queue: .main) { [weak self] note in
-                guard let self, note.userInfo?["serial"] as? String == self.serial, let url = note.userInfo?["url"] as? URL else { return }
-                FileManager.default.createFile(atPath: url.path, contents: nil)
-                self.recording = try? FileHandle(forWritingTo: url)
+                let target = note.userInfo?["serial"] as? String
+                let url = note.userInfo?["url"] as? URL
+                MainActor.assumeIsolated {
+                    guard let self, target == self.serial, let url else { return }
+                    FileManager.default.createFile(atPath: url.path, contents: nil)
+                    self.recording = try? FileHandle(forWritingTo: url)
+                }
             })
             observers.append(NotificationCenter.default.addObserver(forName: MirrorNotification.stopRecording, object: nil, queue: .main) { [weak self] note in
-                guard let self, note.userInfo?["serial"] as? String == self.serial else { return }
-                try? self.recording?.close(); self.recording = nil
+                let target = note.userInfo?["serial"] as? String
+                MainActor.assumeIsolated {
+                    guard let self, target == self.serial else { return }
+                    try? self.recording?.close(); self.recording = nil
+                }
             })
             Task { [adb, serial] in
                 if let out = try? await adb.run(serial: serial, arguments: ["shell", "wm", "size"], timeout: .seconds(5)).stdout,
