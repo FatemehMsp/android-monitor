@@ -3,9 +3,17 @@ name: Release
 # Every push to main is checked against its Conventional Commit messages (see AndroidMonitor/Scripts/next-version.sh):
 #   feat -> minor, fix/perf -> patch, type! or BREAKING CHANGE -> major. docs/chore/ci/... alone release nothing.
 # When a release is due this builds the DMG and publishes a GitHub release with generated notes.
+# Run it by hand from the Actions tab to release now: pick patch / minor / major, or auto to follow the commits.
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump (auto = from commit messages)"
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
 
 permissions:
   contents: write
@@ -16,6 +24,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     runs-on: macos-15
     defaults:
       run:
@@ -27,6 +36,8 @@ jobs:
 
       - name: Decide version
         id: version
+        env:
+          FORCE_BUMP: ${{ inputs.bump }}
         run: ./Scripts/next-version.sh | tee -a "$GITHUB_OUTPUT"
 
       - name: Install XcodeGen

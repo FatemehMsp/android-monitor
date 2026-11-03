@@ -3,6 +3,7 @@
 #   feat:            -> minor      fix: / perf:  -> patch      type!: or "BREAKING CHANGE" -> major
 #   docs / chore / ci / test / build / style / refactor alone -> no release
 # A commit containing "[skip release]" never triggers one. Prints key=value lines (for $GITHUB_OUTPUT).
+# FORCE_BUMP=patch|minor|major overrides the commit analysis (used by the manual workflow run).
 set -euo pipefail
 last="$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)"
 range="${last:+$last..}HEAD"
@@ -19,6 +20,8 @@ while IFS= read -r -d $'\x1e' entry; do
   elif [[ "$subject" =~ '^(fix|perf)(\(|:)' ]]; then [[ $bump == none ]] && bump=patch
   fi
 done < <(git log "$range" --format='%B%x1e')
+
+[[ -n "${FORCE_BUMP:-}" && "${FORCE_BUMP}" != auto ]] && bump="$FORCE_BUMP"
 
 case $bump in
   major) major=$((major+1)); minor=0; patch=0 ;;
